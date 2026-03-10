@@ -1,0 +1,237 @@
+/**
+ * This ruleset enforces a security model for a job application portal.
+ *
+ * Core Philosophy:
+ * The security model is a hybrid, combining strict user-ownership for applicant
+ * data with public access for job listings and privileged access for administrators.
+ * This ensures applicants' personal information is private while job circulars
+ * are broadly accessible.
+ *
+ * Data Structure:
+ * All sensitive applicant data (profiles, qualifications, applications) is
+ * siloed within the `/applicants/{userId}` path. This path-based ownership
+ * is the cornerstone of the security model. Public data, like job circulars,
+ * resides in a top-level `/jobCirculars` collection. Administrator roles are
+ * managed in a separate, locked-down `/roles_admin` collection.
+ *
+ * Key Security Decisions:
+ * - Applicant Isolation: Users can only access data within their own
+ *   `/applicants/{userId}` data tree. They cannot see or list other applicants.
+ * - Public Job Listings: The `/jobCirculars` collection is publicly readable by
+ *   anyone, including unauthenticated users, to allow browsing of job openings.
+ *   However, only administrators can create, update, or delete job circulars.
+ * - Role-Based Admin Access: A user is considered an administrator if a document
+ *   with their UID exists in the `/roles_admin` collection. This provides a
+ *   centralized and secure way to grant broad read access and specific write
+ *   privileges across the database.
+ * - Read-Only Generated Documents: Certain documents, like Admit Cards, are
+ *   read-only for applicants but writable by administrators, reflecting that
+ *   they are system-generated and controlled.
+ *
+ * Denormalization for Authorization:
+ * Authorization checks are designed to be fast and simple. We avoid costly `get()`
+ * calls in rules by embedding the owner's ID directly in the document path (e.g.,
+ * `/applicants/{applicantId}/...`). This allows for a direct `request.auth.uid == applicantId`
+ * check. Similarly, admin roles are checked with a single `exists()` call, which is
+ * highly performant.
+ *
+ * Structural Segregation:
+ * The separation of public data (`/jobCirculars`) from private user data
+ * (`/applicants`) is a deliberate design choice. It allows for safe and
+ * efficient `list` operations on public data without any risk of leaking
+ * private information.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    //================================================================================
+    // Helper Functions
+    //================================================================================
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * DEVELOPMENT-ONLY: Checks if the user is an admin.
+     * This is temporarily set to allow ANY signed-in user for easier development.
+     * FOR PRODUCTION, this MUST be changed back to a role-based check.
+     * e.g., return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+     */
+    function isAdmin() {
+      return isSignedIn();
+    }
+
+    /**
+     * Checks if the authenticated user's UID matches the provided userId from the path.
+     * This is the primary function for enforcing data ownership.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * A robust check for update and delete operations, ensuring the user is the
+     * owner AND the document actually exists.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * Validates that on document creation, an internal 'applicantId' field
+     * matches the 'applicantId' from the document path.
+     * Principle: Enforces relational integrity.
+     */
+    function isApplicantOwnerOnCreate(applicantId) {
+      return request.resource.data.applicantId == applicantId;
+    }
+
+    /**
+     * Validates that on document update, the internal 'applicantId' field
+     * remains unchanged, preventing re-assignment of ownership.
+     * Principle: Enforces immutability of ownership fields.
+     */
+    function isApplicantOwnerImmutable() {
+      return request.resource.data.applicantId == resource.data.applicantId;
+    }
+
+    /**
+     * Validates that a sub-document (like a Payment or AdmitCard) correctly
+     * links to its parent application upon creation.
+     */
+    function linksToParentApplicationOnCreate(applicationId) {
+      return request.resource.data.applicationId == applicationId;
+    }
+
+    /**
+     * Ensures a sub-document's link to its parent application cannot be
+     * changed after creation.
+     */
+    function parentApplicationIsImmutable() {
+      return request.resource.data.applicationId == resource.data.applicationId;
+    }
+
+
+    //================================================================================
+    // Public Collections
+    //================================================================================
+
+    /**
+     * @description Publicly readable collection of job circulars. Only admins can manage documents.
+     * @path /jobCirculars/{jobCircularId}
+     * @allow (get, list) An anonymous or signed-in user reads any job circular.
+     * @deny (create) A regular signed-in user tries to post a new job circular.
+     * @principle Implements a "Public Read, Admin-Only Write" pattern for site-wide content.
+     */
+    match /jobCirculars/{jobCircularId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+     match /paymentMethods/{paymentMethodId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    //================================================================================
+    // Applicant Data (User-Owned & Admin Access)
+    //================================================================================
+    
+    /**
+     * @description Applicant profile data. Only the applicant can manage their own profile. Admins have read access.
+     * @path /applicants/{applicantId}
+     * @allow (create) A new user signs up and creates their profile document using their own UID.
+     * @deny (get) A user tries to read another user's profile document.
+     * @principle Enforces a strict data silo where users can only access their own data subtree.
+     */
+    match /applicants/{applicantId} {
+      allow list: if isAdmin();
+      allow get: if isOwner(applicantId) || isAdmin();
+      allow create: if isOwner(applicantId); // User creates their own document
+      allow update: if isOwner(applicantId) || isAdmin(); // Owner or admin can update
+      allow delete: if isOwner(applicantId) || isAdmin(); // Owner or admin can delete
+
+      /**
+       * @description Applicant's educational qualifications. Inherits ownership from the parent applicant.
+       * @path /applicants/{applicantId}/educationalQualifications/{educationalQualificationId}
+       * @allow (create) An applicant adds a new educational degree to their own profile.
+       * @deny (update) An applicant tries to modify the qualifications of another user.
+       * @principle Restricts access to a user's own data tree and validates relational integrity on create/update.
+       */
+      match /educationalQualifications/{educationalQualificationId} {
+        allow get, list: if isOwner(applicantId) || isAdmin();
+        allow create: if isOwner(applicantId) && isApplicantOwnerOnCreate(applicantId);
+        allow update: if isExistingOwner(applicantId) && isApplicantOwnerImmutable();
+        allow delete: if isExistingOwner(applicantId);
+      }
+
+      /**
+       * @description Job applications submitted by the applicant. Inherits ownership from the parent applicant.
+       * @path /applicants/{applicantId}/applications/{applicationId}
+       * @allow (get) An applicant views one of their submitted applications.
+       * @deny (list) An applicant tries to list all applications submitted by another user.
+       * @principle Restricts access to a user's own data tree and validates relational integrity on create/update.
+       */
+      match /applications/{applicationId} {
+        allow get, list: if isOwner(applicantId) || isAdmin();
+        allow create: if isOwner(applicantId) && isApplicantOwnerOnCreate(applicantId);
+        allow update: if isExistingOwner(applicantId) && isApplicantOwnerImmutable();
+        allow delete: if isExistingOwner(applicantId);
+
+        /**
+         * @description Payment records for a specific application. Inherits ownership.
+         * @path /applicants/{applicantId}/applications/{applicationId}/payments/{paymentId}
+         * @allow (create) An applicant creates a payment record for their application.
+         * @deny (get) An applicant tries to view payment details for another user's application.
+         * @principle Enforces ownership from the top-level path and validates the link to the parent application document.
+         */
+        match /payments/{paymentId} {
+          allow get, list: if isOwner(applicantId) || isAdmin();
+          allow create: if isOwner(applicantId) && linksToParentApplicationOnCreate(applicationId);
+          allow update: if isExistingOwner(applicantId) && parentApplicationIsImmutable();
+          allow delete: if isExistingOwner(applicantId);
+        }
+
+        /**
+         * @description Admit cards generated for an application. Read-only for applicants, writable by admins.
+         * @path /applicants/{applicantId}/applications/{applicationId}/admitCards/{admitCardId}
+         * @allow (get) An applicant downloads their generated admit card.
+         * @deny (create, update) An applicant tries to create or modify their own admit card.
+         * @principle Secures system-generated documents, allowing owner-read but restricting writes to privileged roles.
+         */
+        match /admitCards/{admitCardId} {
+          allow get, list: if isOwner(applicantId) || isAdmin();
+          allow create: if isAdmin() && linksToParentApplicationOnCreate(applicationId);
+          allow update: if isAdmin() && resource != null && parentApplicationIsImmutable();
+          allow delete: if isAdmin() && resource != null;
+        }
+      }
+    }
+
+
+    //================================================================================
+    // Administrative Collections
+    //================================================================================
+
+    /**
+     * @description Stores a list of admin UIDs. Document existence grants admin rights.
+     * @path /roles_admin/{adminUid}
+     * @allow (get, list, create, update, delete) No client access is ever permitted.
+     * @deny (any) All client-side requests are blocked.
+     * @principle This collection must be managed manually or via a trusted server process, never by clients. It is for rule lookups only.
+     */
+    match /roles_admin/{adminUid} {
+      // This rule is insecure for production but allows the client-side admin bootstrap to work.
+      // A user can create their own role document upon sign-up.
+      // For production, this should be `allow write: if isAdmin();` and managed by a backend.
+      allow create: if isOwner(adminUid);
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}

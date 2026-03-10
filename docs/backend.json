@@ -1,0 +1,551 @@
+{
+  "entities": {
+    "JobCircular": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "JobCircular",
+      "type": "object",
+      "description": "Represents a single job circular or advertisement published by the admin.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the JobCircular entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The official title of the job position being advertised."
+        },
+        "description": {
+          "type": "string",
+          "description": "Full details of the job circular, including responsibilities, requirements, and benefits."
+        },
+        "salaryInformation": {
+          "type": "string",
+          "description": "Information about the salary or pay scale for the position."
+        },
+        "applicationDeadline": {
+          "type": "string",
+          "description": "The date and time by which applicants must submit their applications.",
+          "format": "date-time"
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates whether the job circular is currently active and accepting applications."
+        },
+        "publishedDate": {
+          "type": "string",
+          "description": "The date and time when the job circular was first published.",
+          "format": "date-time"
+        },
+        "updatedDate": {
+          "type": "string",
+          "description": "The date and time when the job circular was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "applicationDeadline",
+        "isActive",
+        "publishedDate"
+      ]
+    },
+    "Applicant": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Applicant",
+      "type": "object",
+      "description": "Stores the personal and contact information of an individual applicant.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Applicant entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the applicant."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the applicant."
+        },
+        "fathersName": {
+          "type": "string",
+          "description": "The father's name of the applicant."
+        },
+        "mothersName": {
+          "type": "string",
+          "description": "The mother's name of the applicant."
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "description": "The date of birth of the applicant.",
+          "format": "date"
+        },
+        "gender": {
+          "type": "string",
+          "description": "The gender of the applicant (e.g., Male, Female, Other)."
+        },
+        "nationality": {
+          "type": "string",
+          "description": "The nationality of the applicant."
+        },
+        "nidNumber": {
+          "type": "string",
+          "description": "The National ID (NID) number of the applicant."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the applicant.",
+          "format": "email"
+        },
+        "mobileNumber": {
+          "type": "string",
+          "description": "The mobile number of the applicant."
+        },
+        "presentStreet": {
+          "type": "string",
+          "description": "The street address for the applicant's present address."
+        },
+        "presentCity": {
+          "type": "string",
+          "description": "The city for the applicant's present address."
+        },
+        "presentDistrict": {
+          "type": "string",
+          "description": "The district for the applicant's present address."
+        },
+        "presentPostalCode": {
+          "type": "string",
+          "description": "The postal code for the applicant's present address."
+        },
+        "permanentStreet": {
+          "type": "string",
+          "description": "The street address for the applicant's permanent address."
+        },
+        "permanentCity": {
+          "type": "string",
+          "description": "The city for the applicant's permanent address."
+        },
+        "permanentDistrict": {
+          "type": "string",
+          "description": "The district for the applicant's permanent address."
+        },
+        "permanentPostalCode": {
+          "type": "string",
+          "description": "The postal code for the applicant's permanent address."
+        },
+        "maritalStatus": {
+          "type": "string",
+          "description": "The marital status of the applicant (e.g., Single, Married)."
+        },
+        "religion": {
+          "type": "string",
+          "description": "The religion of the applicant."
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "dateOfBirth",
+        "gender",
+        "nationality",
+        "nidNumber",
+        "email",
+        "mobileNumber",
+        "presentStreet",
+        "presentCity",
+        "presentDistrict",
+        "permanentStreet",
+        "permanentCity",
+        "permanentDistrict",
+        "maritalStatus",
+        "religion"
+      ]
+    },
+    "EducationalQualification": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "EducationalQualification",
+      "type": "object",
+      "description": "Details of an applicant's educational background.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the EducationalQualification entity."
+        },
+        "applicantId": {
+          "type": "string",
+          "description": "Reference to the Applicant who holds this qualification. (Relationship: Applicant 1:N EducationalQualification)"
+        },
+        "degreeName": {
+          "type": "string",
+          "description": "The name of the degree or examination (e.g., SSC, HSC, Bachelor of Science)."
+        },
+        "institutionName": {
+          "type": "string",
+          "description": "The name of the educational institution attended."
+        },
+        "passingYear": {
+          "type": "number",
+          "description": "The year the qualification was obtained."
+        },
+        "result": {
+          "type": "string",
+          "description": "The result obtained (e.g., GPA, CGPA, Division, Grade)."
+        },
+        "boardUniversity": {
+          "type": "string",
+          "description": "The name of the board or university that awarded the qualification."
+        }
+      },
+      "required": [
+        "id",
+        "applicantId",
+        "degreeName",
+        "institutionName",
+        "passingYear",
+        "result"
+      ]
+    },
+    "Application": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Application",
+      "type": "object",
+      "description": "Represents a single application submitted by an applicant for a specific job circular.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Application entity, serving as the auto-generated User ID for payment and tracking."
+        },
+        "applicantId": {
+          "type": "string",
+          "description": "Reference to the Applicant who submitted this application. (Relationship: Applicant 1:N Application)"
+        },
+        "jobCircularId": {
+          "type": "string",
+          "description": "Reference to the JobCircular this application is for. (Relationship: JobCircular 1:N Application)"
+        },
+        "applicationDate": {
+          "type": "string",
+          "description": "The date and time when the application was submitted.",
+          "format": "date-time"
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "The current payment status of the application (e.g., Unpaid, Pending, Paid, Cancelled)."
+        },
+        "paymentId": {
+          "type": "string",
+          "description": "Reference to the Payment entity if a payment has been made for this application. (Relationship: Application 1:1 Payment)"
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "URL or path to the applicant's uploaded photo.",
+          "format": "uri"
+        },
+        "signatureUrl": {
+          "type": "string",
+          "description": "URL or path to the applicant's uploaded signature.",
+          "format": "uri"
+        },
+        "invoiceUrl": {
+          "type": "string",
+          "description": "URL or path to the auto-generated PDF invoice/applicant copy.",
+          "format": "uri"
+        },
+        "admitCardId": {
+          "type": "string",
+          "description": "Reference to the AdmitCard entity generated for this application. (Relationship: Application 1:1 AdmitCard)"
+        }
+      },
+      "required": [
+        "id",
+        "applicantId",
+        "jobCircularId",
+        "applicationDate",
+        "paymentStatus"
+      ]
+    },
+    "Payment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Payment",
+      "type": "object",
+      "description": "Records details of a payment transaction made by an applicant for an application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Payment entity, often the transaction ID from the payment gateway."
+        },
+        "applicationId": {
+          "type": "string",
+          "description": "Reference to the Application associated with this payment. (Relationship: Application 1:1 Payment)"
+        },
+        "gatewayTransactionId": {
+          "type": "string",
+          "description": "The actual transaction ID provided by the payment gateway (e.g., bKash, Nagad, Rocket)."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of money paid."
+        },
+        "currency": {
+          "type": "string",
+          "description": "The currency of the payment (e.g., BDT)."
+        },
+        "paymentGateway": {
+          "type": "string",
+          "description": "The payment gateway used for the transaction (e.g., bKash, Nagad, Rocket)."
+        },
+        "paymentDate": {
+          "type": "string",
+          "description": "The date and time when the payment was successfully processed.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the payment transaction (e.g., Pending, Success, Failed, Refunded)."
+        },
+        "verifiedByAdmin": {
+          "type": "boolean",
+          "description": "Indicates if this payment has been manually verified by an administrator."
+        }
+      },
+      "required": [
+        "id",
+        "applicationId",
+        "gatewayTransactionId",
+        "amount",
+        "currency",
+        "paymentGateway",
+        "paymentDate",
+        "status"
+      ]
+    },
+    "AdmitCard": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AdmitCard",
+      "type": "object",
+      "description": "Contains details necessary for an applicant's admit card, including exam information.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AdmitCard entity."
+        },
+        "applicationId": {
+          "type": "string",
+          "description": "Reference to the Application for which this admit card is generated. (Relationship: Application 1:1 AdmitCard)"
+        },
+        "examDate": {
+          "type": "string",
+          "description": "The date of the examination.",
+          "format": "date"
+        },
+        "examTime": {
+          "type": "string",
+          "description": "The time of the examination."
+        },
+        "examLocation": {
+          "type": "string",
+          "description": "The physical location or venue where the examination will take place."
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Any special instructions or guidelines for the examinee."
+        },
+        "downloadUrl": {
+          "type": "string",
+          "description": "URL or path to the generated PDF admit card for download.",
+          "format": "uri"
+        },
+        "generatedDate": {
+          "type": "string",
+          "description": "The date and time when the admit card was generated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "applicationId",
+        "examDate",
+        "examTime",
+        "examLocation",
+        "downloadUrl",
+        "generatedDate"
+      ]
+    },
+    "AdminRole": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AdminRole",
+      "type": "object",
+      "description": "Defines an administrator role. The document ID is the user's UID.",
+      "properties": {
+        "role": {
+          "type": "string",
+          "description": "The role of the user, e.g., 'admin'.",
+          "enum": [
+            "admin"
+          ]
+        },
+        "assignedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the role was assigned."
+        }
+      },
+      "required": [
+        "role",
+        "assignedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/jobCirculars/{jobCircularId}",
+        "definition": {
+          "entityName": "jobCircular",
+          "schema": {
+            "$ref": "#/backend/entities/JobCircular"
+          },
+          "description": "Stores details of active and inactive job circulars. Publicly readable by all users. Write access is restricted to authenticated administrators. No get() required for authorization due to global read access.",
+          "params": [
+            {
+              "name": "jobCircularId",
+              "description": "The unique identifier for a specific job circular."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/applicants/{applicantId}",
+        "definition": {
+          "entityName": "applicant",
+          "schema": {
+            "$ref": "#/backend/entities/Applicant"
+          },
+          "description": "Stores the primary profile information for an applicant. Access is strictly controlled such that only the applicant themselves (matching 'request.auth.uid' with '{applicantId}') can read/write their own profile, or an administrator can read. This structure uses path-based ownership for authorization independence.",
+          "params": [
+            {
+              "name": "applicantId",
+              "description": "The unique identifier for the applicant, matching Firebase 'request.auth.uid'."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/applicants/{applicantId}/educationalQualifications/{educationalQualificationId}",
+        "definition": {
+          "entityName": "educationalQualification",
+          "schema": {
+            "$ref": "#/backend/entities/EducationalQualification"
+          },
+          "description": "Stores educational qualifications associated with a specific applicant. Access is limited to the owning applicant (based on 'applicantId' in the path, which matches 'request.auth.uid') and administrators. The 'applicantId' in the path provides authorization independence.",
+          "params": [
+            {
+              "name": "applicantId",
+              "description": "The unique identifier for the owning applicant, matching Firebase 'request.auth.uid'."
+            },
+            {
+              "name": "educationalQualificationId",
+              "description": "The unique identifier for a specific educational qualification record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/applicants/{applicantId}/applications/{applicationId}",
+        "definition": {
+          "entityName": "application",
+          "schema": {
+            "$ref": "#/backend/entities/Application"
+          },
+          "description": "Stores a specific job application submitted by an applicant for a job circular. Access is restricted to the owning applicant (matching 'request.auth.uid' with '{applicantId}') and administrators. The 'applicantId' in the path enables authorization independence.",
+          "params": [
+            {
+              "name": "applicantId",
+              "description": "The unique identifier for the owning applicant, matching Firebase 'request.auth.uid'."
+            },
+            {
+              "name": "applicationId",
+              "description": "The unique identifier for a specific application instance."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/applicants/{applicantId}/applications/{applicationId}/payments/{paymentId}",
+        "definition": {
+          "entityName": "payment",
+          "schema": {
+            "$ref": "#/backend/entities/Payment"
+          },
+          "description": "Records details of a payment transaction for a specific application. Access is restricted to the owning applicant and administrators. The 'applicantId' in the path ensures authorization independence.",
+          "params": [
+            {
+              "name": "applicantId",
+              "description": "The unique identifier for the owning applicant, matching Firebase 'request.auth.uid'."
+            },
+            {
+              "name": "applicationId",
+              "description": "The unique identifier for the associated application."
+            },
+            {
+              "name": "paymentId",
+              "description": "The unique identifier for a specific payment transaction."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/applicants/{applicantId}/applications/{applicationId}/admitCards/{admitCardId}",
+        "definition": {
+          "entityName": "admitCard",
+          "schema": {
+            "$ref": "#/backend/entities/AdmitCard"
+          },
+          "description": "Contains details for an applicant's admit card, linked to a specific application. Read access is for the owning applicant and administrators. Write access is for administrators only. The 'applicantId' in the path provides authorization independence.",
+          "params": [
+            {
+              "name": "applicantId",
+              "description": "The unique identifier for the owning applicant, matching Firebase 'request.auth.uid'."
+            },
+            {
+              "name": "applicationId",
+              "description": "The unique identifier for the associated application."
+            },
+            {
+              "name": "admitCardId",
+              "description": "The unique identifier for a specific admit card."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{adminUid}",
+        "definition": {
+          "entityName": "adminRole",
+          "schema": {
+            "$ref": "#/backend/entities/AdminRole"
+          },
+          "description": "This collection contains documents where the document ID ('adminUid') corresponds to the 'uid' of a Firebase authenticated user who has administrator privileges. The *existence* of a document here grants admin rights. Used for DBAC (Database Access Control) and enables authorization independence for admin actions.",
+          "params": [
+            {
+              "name": "adminUid",
+              "description": "The unique identifier for an administrator, matching Firebase 'request.auth.uid'."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure prioritizes secure, scalable, and debuggable authorization by adhering strictly to the core design principles, especially Authorization Independence and QAPs (Query-Aware Rules).\n\n1.  **Authorization Independence (CRITICAL):**\n    *   **Path-Based Ownership Denormalization:** For all applicant-related data (Applicant profiles, Educational Qualifications, Applications, Payments, Admit Cards), authorization context is denormalized directly into the document path. For instance, paths like `/applicants/{applicantId}/applications/{applicationId}` embed the owner's unique ID (`applicantId`) directly. This allows security rules to evaluate `request.auth.uid == applicantId` without needing any `get()` calls to check parent documents for ownership, making operations atomic and highly performant.\n    *   **Admin Role Denormalization:** Administrative privileges are handled via a dedicated top-level collection, `/roles_admin/{adminUid}`. The mere existence of a document with the `adminUid` matching `request.auth.uid` grants admin rights. This ensures that admin checks (`exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))`) are independent of other data collections and do not rely on hierarchical lookups.\n\n2.  **QAPs (Query-Aware Rules):**\n    *   **Structural Segregation for Homogeneous Security:**\n        *   The `/jobCirculars` collection has a homogeneous security posture: public read for all users, admin write. This allows applicants to list all job circulars efficiently (`allow list, read: if true;`), and rules for write access only check if the user is an admin.\n        *   Applicant-specific subcollections (e.g., `/applicants/{applicantId}/applications`) also maintain homogeneous security: owner-specific read/write, admin read. When an applicant lists their own applications, the rule `allow list, read: if request.auth.uid == applicantId;` is applied. This rule doesn't filter the query based on document content, but rather restricts the *scope* of the query to the user's own path, fully supporting QAPs for owner-specific lists.\n    *   **Admin Listing:** Administrators can perform broad `list` queries across all applicant data (e.g., all applications for all applicants) because their `isAdmin()` rule grants them read access to entire collections, without forcing client-side filtering or inefficient security rule evaluations.\n\n3.  **Clarity of Intent & Debuggability:** The path structure clearly delineates ownership and data relationships. For example, it's immediately apparent that `/applicants/{applicantId}/applications/{applicationId}` represents an application belonging to `applicantId`. Security rules become straightforward `if request.auth.uid == applicantId` or `if isAdmin()`, making them easy to write, understand, and debug."
+  }
+}
+
+    

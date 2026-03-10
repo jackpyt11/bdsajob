@@ -1,0 +1,2 @@
+
+Error: It looks like you haven't created a Realtime Database instance in this project before. Please run firebase init database to create your default Realtime Database instance.
